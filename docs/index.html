@@ -1,0 +1,1259 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>轻企AI智能办公系统 V1.0</title>
+  <!-- Element Plus -->
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/element-plus@2.4.4/dist/index.css">
+  <!-- Chart.js -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+  <!-- Font -->
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg-primary: #0f1117;
+      --bg-secondary: #1a1d27;
+      --bg-card: #232736;
+      --bg-hover: #2a2f42;
+      --border-color: #2e3348;
+      --text-primary: #e8eaf0;
+      --text-secondary: #8b90a0;
+      --text-muted: #5c6175;
+      --accent: #6366f1;
+      --accent-hover: #818cf8;
+      --accent-bg: rgba(99,102,241,0.12);
+      --success: #10b981;
+      --warning: #f59e0b;
+      --danger: #ef4444;
+      --info: #3b82f6;
+      --radius: 12px;
+      --shadow: 0 4px 24px rgba(0,0,0,0.3);
+    }
+    [data-theme="light"] {
+      --bg-primary: #f0f2f8;
+      --bg-secondary: #ffffff;
+      --bg-card: #ffffff;
+      --bg-hover: #f5f6fa;
+      --border-color: #e2e5ef;
+      --text-primary: #1a1d27;
+      --text-secondary: #6b7280;
+      --text-muted: #9ca3af;
+      --accent-bg: rgba(99,102,241,0.08);
+      --shadow: 0 4px 20px rgba(0,0,0,0.06);
+    }
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body {
+      font-family: 'Inter', -apple-system, 'Segoe UI', Roboto, sans-serif;
+      background: var(--bg-primary);
+      color: var(--text-primary);
+      overflow: hidden;
+      height: 100vh;
+    }
+    /* Scrollbar */
+    ::-webkit-scrollbar { width: 6px; }
+    ::-webkit-scrollbar-track { background: transparent; }
+    ::-webkit-scrollbar-thumb { background: var(--border-color); border-radius: 3px; }
+    /* App Layout */
+    #app { display: flex; height: 100vh; }
+    /* Sidebar */
+    .sidebar {
+      width: 240px;
+      background: var(--bg-secondary);
+      border-right: 1px solid var(--border-color);
+      display: flex;
+      flex-direction: column;
+      flex-shrink: 0;
+      transition: width 0.25s ease;
+    }
+    .sidebar.collapsed { width: 64px; }
+    .sidebar-header {
+      padding: 16px;
+      border-bottom: 1px solid var(--border-color);
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      min-height: 64px;
+    }
+    .logo-icon {
+      width: 36px; height: 36px;
+      background: linear-gradient(135deg, #6366f1, #8b5cf6);
+      border-radius: 10px;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 18px; flex-shrink: 0;
+    }
+    .sidebar-title { font-size: 15px; font-weight: 700; color: var(--text-primary); line-height: 1.2; }
+    .sidebar-subtitle { font-size: 11px; color: var(--text-muted); }
+    .sidebar-nav { flex: 1; overflow-y: auto; padding: 8px; }
+    .nav-item {
+      display: flex; align-items: center; gap: 10px;
+      padding: 10px 12px;
+      border-radius: var(--radius);
+      cursor: pointer;
+      color: var(--text-secondary);
+      font-size: 13.5px;
+      font-weight: 500;
+      transition: all 0.15s;
+      margin-bottom: 2px;
+      white-space: nowrap;
+      overflow: hidden;
+    }
+    .nav-item:hover { background: var(--bg-hover); color: var(--text-primary); }
+    .nav-item.active { background: var(--accent-bg); color: var(--accent); }
+    .nav-item .nav-icon { font-size: 18px; width: 22px; text-align: center; flex-shrink: 0; }
+    .nav-divider { height: 1px; background: var(--border-color); margin: 8px 12px; }
+    .nav-badge {
+      margin-left: auto;
+      background: var(--accent);
+      color: white;
+      font-size: 10px;
+      padding: 2px 6px;
+      border-radius: 10px;
+      font-weight: 600;
+    }
+    /* Main Content */
+    .main { flex: 1; display: flex; flex-direction: column; overflow: hidden; }
+    .topbar {
+      height: 56px;
+      border-bottom: 1px solid var(--border-color);
+      background: var(--bg-secondary);
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 0 20px;
+      flex-shrink: 0;
+    }
+    .topbar-title { font-size: 15px; font-weight: 600; }
+    .topbar-actions { display: flex; align-items: center; gap: 12px; }
+    .topbar-btn {
+      width: 36px; height: 36px;
+      border: 1px solid var(--border-color);
+      background: var(--bg-card);
+      border-radius: 8px;
+      display: flex; align-items: center; justify-content: center;
+      cursor: pointer;
+      font-size: 16px;
+      transition: all 0.15s;
+    }
+    .topbar-btn:hover { border-color: var(--accent); color: var(--accent); }
+    .content { flex: 1; overflow-y: auto; padding: 20px; }
+    /* Cards */
+    .card {
+      background: var(--bg-card);
+      border: 1px solid var(--border-color);
+      border-radius: var(--radius);
+      padding: 20px;
+      margin-bottom: 16px;
+      box-shadow: var(--shadow);
+    }
+    .card-header {
+      display: flex; align-items: center; justify-content: space-between;
+      margin-bottom: 16px;
+    }
+    .card-title { font-size: 15px; font-weight: 600; }
+    /* Stats Grid */
+    .stats-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 12px;
+      margin-bottom: 20px;
+    }
+    .stat-card {
+      background: var(--bg-card);
+      border: 1px solid var(--border-color);
+      border-radius: var(--radius);
+      padding: 16px;
+      position: relative;
+      overflow: hidden;
+    }
+    .stat-card::before {
+      content: '';
+      position: absolute;
+      top: 0; left: 0; right: 0; height: 3px;
+      background: var(--accent);
+    }
+    .stat-card.success::before { background: var(--success); }
+    .stat-card.warning::before { background: var(--warning); }
+    .stat-card.info::before { background: var(--info); }
+    .stat-card.danger::before { background: var(--danger); }
+    .stat-value { font-size: 28px; font-weight: 700; color: var(--text-primary); margin: 4px 0; }
+    .stat-label { font-size: 12px; color: var(--text-muted); font-weight: 500; text-transform: uppercase; letter-spacing: 0.5px; }
+    .stat-change { font-size: 11px; margin-top: 4px; }
+    .stat-change.up { color: var(--success); }
+    .stat-change.down { color: var(--danger); }
+    /* Charts Row */
+    .charts-row { display: grid; grid-template-columns: 2fr 1fr; gap: 16px; margin-bottom: 16px; }
+    .chart-container { height: 240px; position: relative; }
+    /* Chat */
+    .chat-layout { display: flex; flex-direction: column; height: calc(100vh - 56px); }
+    .chat-messages { flex: 1; overflow-y: auto; padding: 20px; display: flex; flex-direction: column; gap: 16px; }
+    .msg { display: flex; gap: 12px; max-width: 85%; }
+    .msg.user { align-self: flex-end; flex-direction: row-reverse; }
+    .msg-avatar {
+      width: 36px; height: 36px; border-radius: 10px;
+      background: var(--accent);
+      display: flex; align-items: center; justify-content: center;
+      font-size: 14px; flex-shrink: 0;
+    }
+    .msg.user .msg-avatar { background: var(--success); }
+    .msg-content {
+      background: var(--bg-card);
+      border: 1px solid var(--border-color);
+      border-radius: 12px;
+      padding: 12px 16px;
+      font-size: 13.5px;
+      line-height: 1.6;
+    }
+    .msg.user .msg-content {
+      background: var(--accent);
+      border-color: var(--accent);
+      color: white;
+    }
+    .msg-meta { font-size: 10px; color: var(--text-muted); margin-top: 4px; }
+    .msg.sources-section { margin-top: 8px; }
+    .source-chip {
+      display: inline-flex; align-items: center; gap: 4px;
+      background: var(--bg-hover);
+      border: 1px solid var(--border-color);
+      border-radius: 6px;
+      padding: 3px 8px;
+      font-size: 11px;
+      color: var(--text-secondary);
+      margin-right: 6px;
+      margin-bottom: 4px;
+    }
+    .source-chip .score { color: var(--success); font-weight: 600; }
+    .chat-input-area {
+      border-top: 1px solid var(--border-color);
+      padding: 16px 20px;
+      background: var(--bg-secondary);
+      display: flex; gap: 10px; align-items: flex-end;
+    }
+    .chat-input {
+      flex: 1;
+      background: var(--bg-card);
+      border: 1px solid var(--border-color);
+      border-radius: var(--radius);
+      padding: 12px 16px;
+      color: var(--text-primary);
+      font-size: 13.5px;
+      font-family: inherit;
+      resize: none;
+      outline: none;
+      transition: border-color 0.15s;
+      min-height: 48px;
+      max-height: 120px;
+    }
+    .chat-input:focus { border-color: var(--accent); }
+    .send-btn {
+      width: 48px; height: 48px;
+      background: var(--accent);
+      border: none;
+      border-radius: var(--radius);
+      color: white;
+      font-size: 18px;
+      cursor: pointer;
+      display: flex; align-items: center; justify-content: center;
+      transition: background 0.15s;
+      flex-shrink: 0;
+    }
+    .send-btn:hover { background: var(--accent-hover); }
+    .send-btn:disabled { background: var(--text-muted); cursor: not-allowed; }
+    /* Tables */
+    .data-table { width: 100%; border-collapse: collapse; }
+    .data-table th, .data-table td {
+      text-align: left; padding: 10px 12px;
+      border-bottom: 1px solid var(--border-color);
+      font-size: 13px;
+    }
+    .data-table th { color: var(--text-muted); font-weight: 600; font-size: 11px; text-transform: uppercase; letter-spacing: 0.5px; }
+    .data-table tr:hover td { background: var(--bg-hover); }
+    /* Status Badge */
+    .status-badge {
+      display: inline-flex; align-items: center; gap: 4px;
+      padding: 2px 8px; border-radius: 20px;
+      font-size: 11px; font-weight: 600;
+    }
+    .status-badge.success { background: rgba(16,185,129,0.15); color: var(--success); }
+    .status-badge.warning { background: rgba(245,158,11,0.15); color: var(--warning); }
+    .status-badge.danger { background: rgba(239,68,68,0.15); color: var(--danger); }
+    .status-badge.info { background: rgba(59,130,246,0.15); color: var(--info); }
+    .status-badge.default { background: var(--bg-hover); color: var(--text-secondary); }
+    /* Tag */
+    .tag {
+      display: inline-block; padding: 2px 8px; border-radius: 4px;
+      font-size: 11px; font-weight: 500; margin-right: 4px; margin-bottom: 2px;
+    }
+    /* Buttons */
+    .btn {
+      display: inline-flex; align-items: center; gap: 6px;
+      padding: 7px 14px; border-radius: 8px;
+      font-size: 12.5px; font-weight: 500; cursor: pointer;
+      border: 1px solid var(--border-color);
+      background: var(--bg-card); color: var(--text-primary);
+      transition: all 0.15s; font-family: inherit;
+    }
+    .btn:hover { border-color: var(--accent); color: var(--accent); }
+    .btn.primary { background: var(--accent); border-color: var(--accent); color: white; }
+    .btn.primary:hover { background: var(--accent-hover); }
+    .btn.danger { background: rgba(239,68,68,0.1); border-color: var(--danger); color: var(--danger); }
+    .btn.sm { padding: 4px 10px; font-size: 11px; }
+    .btn-icon { padding: 7px; border-radius: 8px; }
+    /* Health Grid */
+    .health-grid { display: grid; grid-template-columns: repeat(3,1fr); gap: 12px; }
+    .health-item {
+      background: var(--bg-secondary); border: 1px solid var(--border-color);
+      border-radius: 10px; padding: 14px; text-align: center;
+    }
+    .health-item-label { font-size: 11px; color: var(--text-muted); margin-bottom: 6px; }
+    .health-item-value { font-size: 22px; font-weight: 700; }
+    .health-item-bar {
+      height: 4px; background: var(--border-color);
+      border-radius: 2px; margin-top: 6px; overflow: hidden;
+    }
+    .health-item-fill { height: 100%; border-radius: 2px; transition: width 0.3s; }
+    /* Page Views */
+    .page { display: none; }
+    .page.active { display: block; }
+    /* Document Upload */
+    .upload-zone {
+      border: 2px dashed var(--border-color);
+      border-radius: var(--radius);
+      padding: 40px; text-align: center;
+      cursor: pointer;
+      transition: all 0.2s;
+      margin-bottom: 16px;
+    }
+    .upload-zone:hover { border-color: var(--accent); background: var(--accent-bg); }
+    .upload-icon { font-size: 40px; margin-bottom: 12px; color: var(--text-muted); }
+    .upload-text { font-size: 13px; color: var(--text-secondary); }
+    /* Workflow */
+    .workflow-card {
+      background: var(--bg-card); border: 1px solid var(--border-color);
+      border-radius: var(--radius); padding: 16px;
+      margin-bottom: 12px;
+      display: flex; align-items: center; justify-content: space-between;
+      transition: border-color 0.15s;
+    }
+    .workflow-card:hover { border-color: var(--accent); }
+    .workflow-info { flex: 1; }
+    .workflow-name { font-size: 14px; font-weight: 600; margin-bottom: 4px; }
+    .workflow-meta { font-size: 11px; color: var(--text-muted); }
+    .workflow-actions { display: flex; gap: 8px; align-items: center; }
+    /* Empty State */
+    .empty-state {
+      text-align: center; padding: 60px 20px;
+      color: var(--text-muted);
+    }
+    .empty-icon { font-size: 48px; margin-bottom: 12px; opacity: 0.5; }
+    .empty-text { font-size: 14px; }
+    /* Flex utilities */
+    .flex { display: flex; }
+    .flex-between { display: flex; align-items: center; justify-content: space-between; }
+    .gap-8 { gap: 8px; }
+    .gap-12 { gap: 12px; }
+    .mb-12 { margin-bottom: 12px; }
+    .mb-20 { margin-bottom: 20px; }
+    .text-muted { color: var(--text-muted); }
+    .text-sm { font-size: 12px; }
+    .font-bold { font-weight: 600; }
+    /* Loading */
+    .typing-indicator { display: flex; gap: 4px; padding: 4px 0; }
+    .typing-dot {
+      width: 6px; height: 6px; background: var(--text-muted);
+      border-radius: 50%; animation: typing 1.2s infinite;
+    }
+    .typing-dot:nth-child(2) { animation-delay: 0.2s; }
+    .typing-dot:nth-child(3) { animation-delay: 0.4s; }
+    @keyframes typing { 0%,60%,100%{transform:translateY(0)}30%{transform:translateY(-4px)} }
+    /* Alert list */
+    .alert-item {
+      display: flex; align-items: flex-start; gap: 12px;
+      padding: 12px; border-radius: 8px; margin-bottom: 8px;
+      background: var(--bg-hover); border-left: 3px solid transparent;
+    }
+    .alert-item.critical { border-color: var(--danger); background: rgba(239,68,68,0.08); }
+    .alert-item.warning { border-color: var(--warning); background: rgba(245,158,11,0.08); }
+    .alert-item.info { border-color: var(--info); }
+    /* Session list */
+    .session-item {
+      padding: 8px 12px; border-radius: 8px; cursor: pointer;
+      margin-bottom: 4px; display: flex; align-items: center; gap: 8px;
+      transition: background 0.15s;
+    }
+    .session-item:hover { background: var(--bg-hover); }
+    .session-item.active { background: var(--accent-bg); }
+    .session-dot {
+      width: 6px; height: 6px; border-radius: 50%;
+      background: var(--success); flex-shrink: 0;
+    }
+    .session-title { font-size: 12px; flex: 1; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+    /* Token usage bar */
+    .token-bar-wrap { margin-top: 6px; }
+    .token-bar { height: 6px; background: var(--border-color); border-radius: 3px; overflow: hidden; }
+    .token-bar-fill { height: 100%; border-radius: 3px; background: linear-gradient(90deg, var(--accent), var(--success)); transition: width 0.5s; }
+  </style>
+</head>
+<body>
+<div id="app">
+  <!-- Sidebar -->
+  <div class="sidebar" :class="{collapsed: sidebarCollapsed}">
+    <div class="sidebar-header">
+      <div class="logo-icon">⚡</div>
+      <div v-if="!sidebarCollapsed">
+        <div class="sidebar-title">轻企AI</div>
+        <div class="sidebar-subtitle">智能办公系统</div>
+      </div>
+    </div>
+    <div class="sidebar-nav">
+      <div class="nav-item" :class="{active: page==='dashboard'}" @click="switchPage('dashboard')">
+        <span class="nav-icon">📊</span><span v-if="!sidebarCollapsed">仪表盘</span>
+      </div>
+      <div class="nav-item" :class="{active: page==='chat'}" @click="switchPage('chat')">
+        <span class="nav-icon">💬</span><span v-if="!sidebarCollapsed">智能问答</span>
+        <span v-if="!sidebarCollapsed && unreadCount>0" class="nav-badge">{{unreadCount}}</span>
+      </div>
+      <div class="nav-item" :class="{active: page==='documents'}" @click="switchPage('documents')">
+        <span class="nav-icon">📚</span><span v-if="!sidebarCollapsed">文档管理</span>
+      </div>
+      <div class="nav-item" :class="{active: page==='workflows'}" @click="switchPage('workflows')">
+        <span class="nav-icon">🔄</span><span v-if="!sidebarCollapsed">工作流</span>
+      </div>
+      <div class="nav-item" :class="{active: page==='analytics'}" @click="switchPage('analytics')">
+        <span class="nav-icon">📈</span><span v-if="!sidebarCollapsed">运营分析</span>
+      </div>
+      <div class="nav-item" :class="{active: page==='system'}" @click="switchPage('system')">
+        <span class="nav-icon">⚙️</span><span v-if="!sidebarCollapsed">系统设置</span>
+      </div>
+      <div class="nav-divider"></div>
+      <div class="nav-item" @click="sidebarCollapsed=!sidebarCollapsed" style="color:var(--text-muted)">
+        <span class="nav-icon">{{sidebarCollapsed?'→':'←'}}</span>
+        <span v-if="!sidebarCollapsed">收起侧栏</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- Main -->
+  <div class="main">
+    <!-- Topbar -->
+    <div class="topbar">
+      <div class="topbar-title">{{ pageTitle }}</div>
+      <div class="topbar-actions">
+        <div class="topbar-btn" @click="toggleTheme" title="切换主题">🌓</div>
+        <div class="topbar-btn" @click="switchPage('system')" title="健康状态">
+          <span style="font-size:10px" :style="{color: healthColor}">●</span>
+        </div>
+        <div class="topbar-btn" @click="api('/api/system/health')" title="刷新健康">🔄</div>
+      </div>
+    </div>
+
+    <!-- Content -->
+    <div class="content">
+
+      <!-- ========== Dashboard ========== -->
+      <div class="page" :class="{active: page==='dashboard'}">
+        <div class="stats-grid">
+          <div class="stat-card">
+            <div class="stat-label">文档总数</div>
+            <div class="stat-value">{{dash.doc_count||0}}</div>
+            <div class="stat-change up">▲ 知识库</div>
+          </div>
+          <div class="stat-card info">
+            <div class="stat-label">向量切片</div>
+            <div class="stat-value">{{dash.chunk_count||0}}</div>
+            <div class="stat-change">RAG 检索</div>
+          </div>
+          <div class="stat-card success">
+            <div class="stat-label">对话次数</div>
+            <div class="stat-value">{{dash.chat_count||0}}</div>
+            <div class="stat-change up">▲ 本月</div>
+          </div>
+          <div class="stat-card warning">
+            <div class="stat-label">Token今日</div>
+            <div class="stat-value">{{(dash.token_today||0).toLocaleString()}}</div>
+            <div class="token-bar-wrap">
+              <div class="token-bar"><div class="token-bar-fill" :style="{width: dash.tokenUsagePct+'%'}"></div></div>
+              <div class="text-sm text-muted" style="margin-top:2px">{{dash.tokenUsagePct||0}}% / {{(dash.token_daily_limit||0).toLocaleString()}}</div>
+            </div>
+          </div>
+          <div class="stat-card danger">
+            <div class="stat-label">工作流运行</div>
+            <div class="stat-value">{{dash.workflow_runs_today||0}}</div>
+            <div class="stat-change">今日执行</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-label">API延迟</div>
+            <div class="stat-value">{{dash.api_latency_ms||0}}<span style="font-size:14px">ms</span></div>
+            <div class="stat-change" :class="(dash.api_latency_ms||0)<500?'up':'down'">
+              {{(dash.api_latency_ms||0)<500?'正常':'偏高'}}
+            </div>
+          </div>
+        </div>
+        <div class="charts-row">
+          <div class="card">
+            <div class="card-header">
+              <div class="card-title">📈 Token 使用趋势（近7天）</div>
+              <button class="btn sm" @click="loadTokenTrend(30)">近30天</button>
+            </div>
+            <div class="chart-container">
+              <canvas id="tokenChart"></canvas>
+            </div>
+          </div>
+          <div class="card">
+            <div class="card-header"><div class="card-title">🏥 系统健康</div></div>
+            <div class="health-grid">
+              <div class="health-item">
+                <div class="health-item-label">CPU</div>
+                <div class="health-item-value" :style="{color: cpuColor}">{{health.cpu_percent||0}}%</div>
+                <div class="health-item-bar"><div class="health-item-fill" :style="{width:health.cpu_percent+'%',background:cpuColor}"></div></div>
+              </div>
+              <div class="health-item">
+                <div class="health-item-label">内存</div>
+                <div class="health-item-value" :style="{color: memColor}">{{health.memory_percent||0}}%</div>
+                <div class="health-item-bar"><div class="health-item-fill" :style="{width:health.memory_percent+'%',background:memColor}"></div></div>
+              </div>
+              <div class="health-item">
+                <div class="health-item-label">磁盘</div>
+                <div class="health-item-value" :style="{color: diskColor}">{{health.disk_percent||0}}%</div>
+                <div class="health-item-bar"><div class="health-item-fill" :style="{width:health.disk_percent+'%',background:diskColor}"></div></div>
+              </div>
+            </div>
+            <div style="margin-top:12px;font-size:11px;color:var(--text-muted);line-height:1.8">
+              <div>⏱ 运行时间: {{formatUptime(health.uptime_seconds||0)}}</div>
+              <div>💾 DB连接: <span :class="health.db_connected?'text-success':'text-danger'" :style="{color:health.db_connected?'var(--success)':'var(--danger)'}">{{health.db_connected?'✓':'✗'}}</span></div>
+              <div>🧠 AI可用: <span :style="{color:health.ai_available?'var(--success)':'var(--danger)'}">{{health.ai_available?'✓':'✗'}}</span></div>
+              <div>🔍 向量库: <span :style="{color:health.vector_connected?'var(--success)':'var(--danger)'}">{{health.vector_connected?'✓':'✗'}}</span></div>
+            </div>
+          </div>
+        </div>
+        <!-- Recent Logs -->
+        <div class="card">
+          <div class="card-header"><div class="card-title">📋 最近操作</div></div>
+          <table class="data-table">
+            <thead><tr><th>时间</th><th>操作</th><th>目标</th><th>状态</th></tr></thead>
+            <tbody>
+              <tr v-for="log in recentLogs" :key="log.id">
+                <td style="color:var(--text-muted);font-size:12px">{{log.created_at}}</td>
+                <td>{{log.action}}</td>
+                <td style="color:var(--text-secondary)">{{log.target}}</td>
+                <td><span class="status-badge" :class="log.status==='ok'?'success':'danger'">{{log.status}}</span></td>
+              </tr>
+              <tr v-if="recentLogs.length===0"><td colspan="4" style="text-align:center;color:var(--text-muted);padding:20px">暂无记录</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- ========== Chat ========== -->
+      <div class="page" :class="{active: page==='chat'}" style="padding:0">
+        <div style="display:flex;height:100%">
+          <!-- Session Sidebar -->
+          <div style="width:220px;border-right:1px solid var(--border-color);padding:12px;overflow-y:auto;flex-shrink:0">
+            <button class="btn primary" style="width:100%;margin-bottom:12px;justify-content:center" @click="createSession">
+              ✨ 新建对话
+            </button>
+            <div class="text-sm text-muted" style="margin-bottom:8px;font-size:11px">会话列表</div>
+            <div class="session-item" v-for="s in sessions" :key="s.session_id"
+                 :class="{active: currentSession===s.session_id}" @click="selectSession(s.session_id)">
+              <div class="session-dot" v-if="s.is_favorite"></div>
+              <div class="session-title">{{s.title}}</div>
+              <button class="btn btn-icon" style="padding:2px 4px;font-size:10px" @click.stop="deleteSession(s.session_id)">✕</button>
+            </div>
+          </div>
+          <!-- Chat Area -->
+          <div class="chat-layout" style="flex:1">
+            <div class="chat-messages" ref="chatContainer">
+              <div v-if="messages.length===0" class="empty-state">
+                <div class="empty-icon">💬</div>
+                <div class="empty-text">开始一段新对话吧<br><span style="font-size:12px">基于知识库的智能问答</span></div>
+              </div>
+              <div v-for="(msg,i) in messages" :key="i" class="msg" :class="msg.role">
+                <div class="msg-avatar">{{msg.role==='user'?'👤':'🤖'}}</div>
+                <div style="flex:1">
+                  <div class="msg-content">{{msg.content}}</div>
+                  <div v-if="msg.sources&&msg.sources.length>0" class="sources-section">
+                    <span v-for="(src,si) in msg.sources" :key="si" class="source-chip">
+                      📄 {{src.title||'文档'}} <span class="score">{{(src.score*100).toFixed(0)}}%</span>
+                    </span>
+                  </div>
+                  <div class="msg-meta">
+                    {{msg.tokens>0?msg.tokens+' tokens':''}} {{msg.latency>0?'· '+msg.latency+'ms':''}} {{msg.model?'· '+msg.model:''}}
+                  </div>
+                </div>
+              </div>
+              <div v-if="loading" class="msg">
+                <div class="msg-avatar">🤖</div>
+                <div class="msg-content">
+                  <div class="typing-indicator"><div class="typing-dot"></div><div class="typing-dot"></div><div class="typing-dot"></div></div>
+                </div>
+              </div>
+            </div>
+            <!-- Options bar -->
+            <div style="padding:8px 20px;display:flex;gap:12px;align-items:center;flex-wrap:wrap;border-top:1px solid var(--border-color);background:var(--bg-secondary)">
+              <label style="font-size:12px;color:var(--text-muted);display:flex;align-items:center;gap:4px">
+                <input type="checkbox" v-model="chatOptions.useRag"> RAG检索
+              </label>
+              <label style="font-size:12px;color:var(--text-muted);display:flex;align-items:center;gap:4px">
+                Top-K
+                <select v-model="chatOptions.topK" style="background:var(--bg-card);border:1px solid var(--border-color);border-radius:4px;color:var(--text-primary);padding:2px 6px;font-size:12px">
+                  <option value="3">3</option><option value="5">5</option><option value="8">8</option><option value="10">10</option>
+                </select>
+              </label>
+              <button class="btn sm" @click="exportSession">📤 导出</button>
+              <button class="btn sm" @click="toggleFavorite">{{currentSessionInfo?.is_favorite?'★ 已收藏':'☆ 收藏'}}</button>
+              <div style="flex:1"></div>
+              <span class="text-sm text-muted" v-if="currentSessionInfo">{{currentSessionInfo.message_count}}条消息 · {{currentSessionInfo.token_usage.toLocaleString()}} tokens</span>
+            </div>
+            <!-- Input -->
+            <div class="chat-input-area">
+              <textarea class="chat-input" v-model="chatInput" placeholder="输入问题，按 Enter 发送，Shift+Enter 换行..."
+                @keydown.enter.exact.prevent="sendMessage" rows="1" ref="chatInputEl"></textarea>
+              <button class="send-btn" @click="sendMessage" :disabled="loading||!chatInput.trim()">➤</button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ========== Documents ========== -->
+      <div class="page" :class="{active: page==='documents'}">
+        <div class="card mb-20">
+          <div class="upload-zone" @click="$refs.fileInput.click()" @dragover.prevent @drop.prevent="handleDrop">
+            <input type="file" ref="fileInput" multiple accept=".pdf,.docx,.doc,.txt,.md,.csv,.xlsx,.xls,.pptx" style="display:none" @change="handleFileSelect">
+            <div class="upload-icon">📤</div>
+            <div class="upload-text">拖拽文件到此处或点击上传<br><span style="font-size:11px">支持 PDF、Word、Excel、PPT、TXT、Markdown</span></div>
+          </div>
+        </div>
+        <div class="card">
+          <div class="card-header">
+            <div class="card-title">📚 文档列表 ({{docList.total||0}})</div>
+            <div style="display:flex;gap:8px">
+              <input v-model="docFilter" placeholder="搜索文档..." class="chat-input" style="min-height:auto;padding:6px 12px;font-size:12px;width:200px;border-radius:8px">
+            </div>
+          </div>
+          <table class="data-table">
+            <thead><tr><th>标题</th><th>分类</th><th>标签</th><th>切片数</th><th>状态</th><th>大小</th><th>时间</th><th>操作</th></tr></thead>
+            <tbody>
+              <tr v-for="doc in docList.items" :key="doc.id">
+                <td style="font-weight:600">{{doc.title}}</td>
+                <td><span class="status-badge info">{{doc.category}}</span></td>
+                <td>
+                  <span v-for="tag in (doc.tags||'').split(',')" :key="tag" class="tag" style="background:var(--accent-bg);color:var(--accent)" v-if="tag">{{tag}}</span>
+                </td>
+                <td>{{doc.chunk_count}}</td>
+                <td><span class="status-badge" :class="doc.status==='done'?'success':doc.status==='error'?'danger':'warning'">{{doc.status}}</span></td>
+                <td>{{formatSize(doc.file_size)}}</td>
+                <td style="color:var(--text-muted);font-size:12px">{{doc.created_at}}</td>
+                <td>
+                  <button class="btn sm" @click="deleteDoc(doc.id)">🗑 删除</button>
+                </td>
+              </tr>
+              <tr v-if="!docList.items||docList.items.length===0"><td colspan="8" style="text-align:center;color:var(--text-muted);padding:30px">暂无文档，上传文件开始构建知识库</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- ========== Workflows ========== -->
+      <div class="page" :class="{active: page==='workflows'}">
+        <div class="card mb-20">
+          <div class="flex-between">
+            <div class="card-title">🔄 工作流列表</div>
+            <button class="btn primary" @click="showNewWorkflow=true">+ 新建工作流</button>
+          </div>
+        </div>
+        <div v-if="!workflows.length" class="empty-state">
+          <div class="empty-icon">🔄</div>
+          <div class="empty-text">暂无工作流<br><span style="font-size:12px">创建工作流实现自动化办公</span></div>
+        </div>
+        <div v-for="wf in workflows" :key="wf.id" class="workflow-card">
+          <div class="workflow-info">
+            <div class="workflow-name">{{wf.name}}</div>
+            <div class="workflow-meta">
+              类型: {{wf.type}} · Cron: {{wf.cron||'手动'}} · 运行: {{wf.total_runs}}次
+              · 成功率: {{wf.total_runs?((wf.success_runs/wf.total_runs*100).toFixed(0)+'%'):'N/A'}}
+            </div>
+          </div>
+          <div class="workflow-actions">
+            <span class="status-badge" :class="wf.last_status==='success'?'success':wf.last_status==='failed'?'danger':wf.last_status==='running'?'warning':'default'">
+              {{wf.last_status}}
+            </span>
+            <button class="btn sm primary" @click="runWorkflow(wf.id)">▶ 运行</button>
+            <button class="btn sm" @click="toggleWorkflow(wf)">{{wf.enabled?'⏸ 暂停':'▶ 启用'}}</button>
+          </div>
+        </div>
+        <!-- New Workflow Modal -->
+        <div v-if="showNewWorkflow" style="position:fixed;inset:0;background:rgba(0,0,0,0.5);display:flex;align-items:center;justify-content:center;z-index:1000" @click.self="showNewWorkflow=false">
+          <div class="card" style="width:500px;margin:0">
+            <div class="card-title mb-12">新建工作流</div>
+            <div style="margin-bottom:12px">
+              <div class="text-sm text-muted" style="margin-bottom:4px">工作流名称</div>
+              <input v-model="newWorkflow.name" class="chat-input" style="width:100%;min-height:auto;padding:8px 12px;font-size:13px;border-radius:8px">
+            </div>
+            <div style="margin-bottom:12px">
+              <div class="text-sm text-muted" style="margin-bottom:4px">类型</div>
+              <select v-model="newWorkflow.type" style="width:100%;background:var(--bg-card);border:1px solid var(--border-color);border-radius:8px;color:var(--text-primary);padding:8px 12px;font-size:13px">
+                <option value="report">📊 智能报表生成</option>
+                <option value="content">✍️ 批量文案自动化</option>
+                <option value="cleanup">🧹 数据清洗</option>
+                <option value="notify">🔔 智能通知提醒</option>
+                <option value="docbatch">📦 文档批量处理</option>
+                <option value="webhook">🌐 Webhook触发</option>
+              </select>
+            </div>
+            <div style="margin-bottom:12px">
+              <div class="text-sm text-muted" style="margin-bottom:4px">Cron表达式（可选，如 "0 9 * * 1-5" 表示工作日9点）</div>
+              <input v-model="newWorkflow.cron" class="chat-input" placeholder="0 9 * * 1-5" style="width:100%;min-height:auto;padding:8px 12px;font-size:13px;border-radius:8px">
+            </div>
+            <div class="flex gap-8" style="justify-content:flex-end">
+              <button class="btn" @click="showNewWorkflow=false">取消</button>
+              <button class="btn primary" @click="createWorkflow">创建</button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ========== Analytics ========== -->
+      <div class="page" :class="{active: page==='analytics'}">
+        <div class="stats-grid">
+          <div class="stat-card">
+            <div class="stat-label">会话总数</div>
+            <div class="stat-value">{{dash.session_count||0}}</div>
+          </div>
+          <div class="stat-card success">
+            <div class="stat-label">工作流总数</div>
+            <div class="stat-value">{{dash.workflow_count||0}}</div>
+          </div>
+          <div class="stat-card warning">
+            <div class="stat-label">告警总数</div>
+            <div class="stat-value">{{alerts.length}}</div>
+          </div>
+        </div>
+        <div class="card mb-20">
+          <div class="card-header"><div class="card-title">📈 Token 使用趋势</div></div>
+          <div style="display:flex;gap:8px;margin-bottom:12px">
+            <button class="btn sm" :class="{primary:trendDays===7}" @click="loadTokenTrend(7)">7天</button>
+            <button class="btn sm" :class="{primary:trendDays===14}" @click="loadTokenTrend(14)">14天</button>
+            <button class="btn sm" :class="{primary:trendDays===30}" @click="loadTokenTrend(30)">30天</button>
+          </div>
+          <div style="height:200px"><canvas id="trendChart"></canvas></div>
+        </div>
+        <div class="card mb-20">
+          <div class="card-header"><div class="card-title">🔔 告警记录</div></div>
+          <div v-for="a in alerts" :key="a.id" class="alert-item" :class="a.level">
+            <div style="flex:1">
+              <div style="font-size:13px;font-weight:600">{{a.title}}</div>
+              <div style="font-size:11px;color:var(--text-muted);margin-top:2px">{{a.message}} · {{a.created_at}}</div>
+            </div>
+            <button v-if="!a.is_resolved" class="btn sm" @click="resolveAlert(a.id)">解决</button>
+            <span v-else class="status-badge success">已解决</span>
+          </div>
+          <div v-if="!alerts.length" class="empty-state" style="padding:20px">
+            <div class="empty-text">暂无告警，系统运行正常 ✅</div>
+          </div>
+        </div>
+        <div class="card">
+          <div class="card-header"><div class="card-title">⚙️ 操作审计日志</div></div>
+          <table class="data-table">
+            <thead><tr><th>时间</th><th>操作</th><th>目标</th><th>状态</th><th>IP</th></tr></thead>
+            <tbody>
+              <tr v-for="log in allLogs" :key="log.id">
+                <td style="color:var(--text-muted);font-size:12px">{{log.created_at}}</td>
+                <td>{{log.action}}</td>
+                <td style="color:var(--text-secondary)">{{log.target}}</td>
+                <td><span class="status-badge" :class="log.status==='ok'?'success':'danger'">{{log.status}}</span></td>
+                <td style="color:var(--text-muted);font-size:12px">{{log.ip_address||'-'}}</td>
+              </tr>
+              <tr v-if="!allLogs.length"><td colspan="5" style="text-align:center;color:var(--text-muted);padding:20px">暂无记录</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- ========== System Settings ========== -->
+      <div class="page" :class="{active: page==='system'}">
+        <div class="card mb-20">
+          <div class="card-header"><div class="card-title">🤖 AI 模型配置</div></div>
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px">
+            <div>
+              <div class="text-sm text-muted mb-12">当前模式</div>
+              <div style="display:flex;gap:8px">
+                <button class="btn" :class="{primary: sysConfig.ai_mode==='cloud'}" @click="setMode('cloud')">☁️ 云端密钥</button>
+                <button class="btn" :class="{primary: sysConfig.ai_mode==='local'}" @click="setMode('local')">🖥 本地Ollama</button>
+              </div>
+            </div>
+            <div>
+              <div class="text-sm text-muted mb-12">当前模型</div>
+              <div style="font-size:18px;font-weight:700;color:var(--accent)">{{sysConfig.ai_model||'-'}}</div>
+              <div class="text-sm text-muted" style="margin-top:4px">{{sysConfig.ai_base||'-'}}</div>
+            </div>
+          </div>
+        </div>
+        <div class="card mb-20">
+          <div class="card-header"><div class="card-title">⚡ RAG 参数调整</div></div>
+          <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:16px">
+            <div>
+              <div class="text-sm text-muted mb-8">Temperature: {{sysConfig.temperature}}</div>
+              <input type="range" v-model="sysConfig.temperature" min="0" max="1" step="0.1" @change="saveSettings" style="width:100%">
+              <div class="text-sm text-muted">控制创造性（0=严谨, 1=自由）</div>
+            </div>
+            <div>
+              <div class="text-sm text-muted mb-8">Top-K: {{sysConfig.top_k}}</div>
+              <input type="range" v-model="sysConfig.top_k" min="1" max="20" step="1" @change="saveSettings" style="width:100%">
+              <div class="text-sm text-muted">检索相关文档数量</div>
+            </div>
+            <div>
+              <div class="text-sm text-muted mb-8">切片大小: {{sysConfig.chunk_size}}</div>
+              <input type="range" v-model="sysConfig.chunk_size" min="100" max="2000" step="100" @change="saveSettings" style="width:100%">
+              <div class="text-sm text-muted">文档切片字符数</div>
+            </div>
+          </div>
+        </div>
+        <div class="card">
+          <div class="card-header"><div class="card-title">📋 Token 今日用量</div></div>
+          <div class="stats-grid" style="grid-template-columns:repeat(4,1fr)">
+            <div class="stat-card">
+              <div class="stat-label">LLM Tokens</div>
+              <div class="stat-value" style="font-size:20px">{{(tokenStats.llm_tokens||0).toLocaleString()}}</div>
+            </div>
+            <div class="stat-card info">
+              <div class="stat-label">Embedding Tokens</div>
+              <div class="stat-value" style="font-size:20px">{{(tokenStats.embedding_tokens||0).toLocaleString()}}</div>
+            </div>
+            <div class="stat-card success">
+              <div class="stat-label">请求次数</div>
+              <div class="stat-value" style="font-size:20px">{{tokenStats.request_count||0}}</div>
+            </div>
+            <div class="stat-card warning">
+              <div class="stat-label">日配额使用率</div>
+              <div class="stat-value" style="font-size:20px">{{tokenStats.usage_percent||0}}%</div>
+              <div class="token-bar-wrap">
+                <div class="token-bar"><div class="token-bar-fill" :style="{width:(tokenStats.usage_percent||0)+'%'}"></div></div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+    </div><!-- /content -->
+  </div><!-- /main -->
+</div><!-- /app -->
+
+<script src="https://cdn.jsdelivr.net/npm/vue@3.3.8/dist/vue.global.prod.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/element-plus@2.4.4/dist/index.full.min.js"></script>
+<script>
+const { createApp, ref, computed, onMounted, nextTick, watch } = Vue;
+const { ElMessage, ElMessageBox } = ElementPlus;
+
+const app = createApp({
+  setup() {
+    // ========== State ==========
+    const page = ref('dashboard');
+    const sidebarCollapsed = ref(false);
+    const darkTheme = ref(true);
+    const loading = ref(false);
+    const messages = ref([]);
+    const chatInput = ref('');
+    const currentSession = ref('default');
+    const sessions = ref([]);
+    const chatOptions = ref({ useRag: true, topK: 6 });
+    const currentSessionInfo = ref(null);
+    const chatContainer = ref(null);
+    const chatInputEl = ref(null);
+    const docFilter = ref('');
+    const docList = ref({ items: [], total: 0 });
+    const workflows = ref([]);
+    const showNewWorkflow = ref(false);
+    const newWorkflow = ref({ name: '', type: 'report', cron: '' });
+    const health = ref({});
+    const dash = ref({});
+    const tokenStats = ref({});
+    const tokenTrend = ref({ dates: [], llm_tokens: [], embedding_tokens: [] });
+    const trendDays = ref(7);
+    const alerts = ref([]);
+    const recentLogs = ref([]);
+    const allLogs = ref([]);
+    const sysConfig = ref({});
+    let tokenChart = null;
+    let trendChart = null;
+    let _dashTimer = null;
+
+    // ========== Computed ==========
+    const pageTitle = computed(() => ({
+      dashboard: '📊 仪表盘', chat: '💬 智能问答',
+      documents: '📚 文档管理', workflows: '🔄 工作流',
+      analytics: '📈 运营分析', system: '⚙️ 系统设置',
+    }[page.value] || '轻企AI'));
+
+    const healthColor = computed(() => ({
+      ok: '#10b981', warning: '#f59e0b', critical: '#ef4444',
+    }[health.value.status] || '#6b7280'));
+
+    const cpuColor = computed(() => (health.value.cpu_percent||0) > 80 ? 'var(--danger)' : (health.value.cpu_percent||0) > 60 ? 'var(--warning)' : 'var(--success)');
+    const memColor = computed(() => (health.value.memory_percent||0) > 85 ? 'var(--danger)' : (health.value.memory_percent||0) > 70 ? 'var(--warning)' : 'var(--success)');
+    const diskColor = computed(() => (health.value.disk_percent||0) > 90 ? 'var(--danger)' : (health.value.disk_percent||0) > 80 ? 'var(--warning)' : 'var(--success)');
+
+    const unreadCount = computed(() => sessions.value.filter(s => !s.is_archived).length);
+
+    // ========== API Helper ==========
+    async function api(url, opts = {}) {
+      try {
+        const res = await fetch(url, {
+          headers: { 'Content-Type': 'application/json', ...opts.headers },
+          ...opts,
+          body: opts.body ? JSON.stringify(opts.body) : undefined,
+        });
+        const json = await res.json();
+        return json;
+      } catch (e) {
+        console.error('API Error:', e);
+        return { code: -1, message: String(e) };
+      }
+    }
+
+    // ========== Theme ==========
+    function toggleTheme() {
+      darkTheme.value = !darkTheme.value;
+      document.documentElement.setAttribute('data-theme', darkTheme.value ? 'dark' : 'light');
+    }
+
+    // ========== Page Nav ==========
+    async function switchPage(p) {
+      page.value = p;
+      if (p === 'dashboard') await loadDashboard();
+      else if (p === 'chat') { await loadSessions(); if (!currentSession.value) currentSession.value = 'default'; await loadHistory(); }
+      else if (p === 'documents') await loadDocs();
+      else if (p === 'workflows') await loadWorkflows();
+      else if (p === 'analytics') { await loadAlerts(); await loadAllLogs(); await loadTokenTrend(7); }
+      else if (p === 'system') { await loadSettings(); await loadTokenStats(); }
+    }
+
+    // ========== Dashboard ==========
+    async function loadDashboard() {
+      const [d, h, r] = await Promise.all([
+        api('/api/system/dashboard/stats'),
+        api('/api/system/health'),
+        api('/api/system/logs?page=1&page_size=10'),
+      ]);
+      if (d.code === 0) { dash.value = d.data; dash.value.tokenUsagePct = Math.min(100, ((d.data.token_today||0) / (d.data.token_daily_limit||1) * 100).toFixed(2)); }
+      if (h.code === 0) health.value = h.data;
+      if (r.code === 0) recentLogs.value = r.data.items || [];
+      await nextTick();
+      renderTokenChart();
+    }
+
+    async function loadTokenTrend(days) {
+      trendDays.value = days;
+      const res = await api(`/api/system/dashboard/token-trend?days=${days}`);
+      if (res.code === 0) {
+        tokenTrend.value = res.data;
+        renderTrendChart();
+      }
+    }
+
+    function renderTokenChart() {
+      const ctx = document.getElementById('tokenChart');
+      if (!ctx) return;
+      if (tokenChart) tokenChart.destroy();
+      tokenChart = new Chart(ctx, {
+        type: 'line',
+        data: {
+          labels: tokenTrend.value.dates?.map(d => d.slice(5)) || [],
+          datasets: [
+            { label: 'LLM Tokens', data: tokenTrend.value.llm_tokens || [], borderColor: '#6366f1', backgroundColor: 'rgba(99,102,241,0.1)', fill: true, tension: 0.4 },
+            { label: 'Embedding Tokens', data: tokenTrend.value.embedding_tokens || [], borderColor: '#10b981', backgroundColor: 'rgba(16,185,129,0.1)', fill: true, tension: 0.4 },
+          ],
+        },
+        options: {
+          responsive: true, maintainAspectRatio: false,
+          plugins: { legend: { labels: { color: '#8b90a0', font: { size: 11 } } } },
+          scales: {
+            x: { ticks: { color: '#5c6175', font: { size: 10 } }, grid: { color: '#2e3348' } },
+            y: { ticks: { color: '#5c6175', font: { size: 10 } }, grid: { color: '#2e3348' } },
+          },
+        },
+      });
+    }
+
+    function renderTrendChart() {
+      const ctx = document.getElementById('trendChart');
+      if (!ctx) return;
+      if (trendChart) trendChart.destroy();
+      trendChart = new Chart(ctx, {
+        type: 'bar',
+        data: {
+          labels: tokenTrend.value.dates?.map(d => d.slice(5)) || [],
+          datasets: [
+            { label: 'LLM', data: tokenTrend.value.llm_tokens || [], backgroundColor: 'rgba(99,102,241,0.7)', borderRadius: 4 },
+            { label: 'Embedding', data: tokenTrend.value.embedding_tokens || [], backgroundColor: 'rgba(16,185,129,0.7)', borderRadius: 4 },
+          ],
+        },
+        options: {
+          responsive: true, maintainAspectRatio: false,
+          plugins: { legend: { labels: { color: '#8b90a0', font: { size: 11 } } } },
+          scales: {
+            x: { ticks: { color: '#5c6175', font: { size: 10 } }, grid: { color: '#2e3348' } },
+            y: { ticks: { color: '#5c6175', font: { size: 10 } }, grid: { color: '#2e3348' } },
+          },
+        },
+      });
+    }
+
+    // ========== Chat ==========
+    async function loadSessions() {
+      const res = await api('/api/chat/sessions?page=1&page_size=50');
+      if (res.code === 0) sessions.value = res.data.items || [];
+    }
+
+    async function loadHistory() {
+      if (!currentSession.value) return;
+      const res = await api(`/api/chat/history?session_id=${currentSession.value}&limit=100`);
+      if (res.code === 0) {
+        messages.value = (res.data.items || []).flatMap(item => [
+          { role: 'user', content: item.question, sources: [], tokens: 0, latency: 0 },
+          { role: 'assistant', content: item.answer, sources: item.sources || [], tokens: item.tokens_used, latency: item.latency_ms, model: item.model },
+        ]);
+        currentSessionInfo.value = sessions.value.find(s => s.session_id === currentSession.value) || null;
+        await nextTick();
+        scrollToBottom();
+      }
+    }
+
+    async function createSession() {
+      const res = await api('/api/chat/sessions', { method: 'POST' });
+      if (res.code === 0) {
+        sessions.value.unshift(res.data);
+        selectSession(res.data.session_id);
+      }
+    }
+
+    async function selectSession(id) {
+      currentSession.value = id;
+      messages.value = [];
+      await loadHistory();
+    }
+
+    async function deleteSession(id) {
+      await ElMessageBox.confirm('确定删除此会话？', '确认');
+      await api(`/api/chat/sessions/${id}`, { method: 'DELETE' });
+      sessions.value = sessions.value.filter(s => s.session_id !== id);
+      if (currentSession.value === id) { currentSession.value = 'default'; await loadHistory(); }
+      ElMessage.success('会话已删除');
+    }
+
+    async function toggleFavorite() {
+      if (!currentSession.value) return;
+      const info = sessions.value.find(s => s.session_id === currentSession.value);
+      if (!info) return;
+      const res = await api(`/api/chat/sessions/${currentSession.value}`, {
+        method: 'PATCH', body: { is_favorite: !info.is_favorite },
+      });
+      if (res.code === 0) { info.is_favorite = !info.is_favorite; currentSessionInfo.value = { ...info }; }
+    }
+
+    async function exportSession() {
+      if (!currentSession.value) return;
+      const res = await api('/api/chat/export', {
+        method: 'POST', body: { session_id: currentSession.value, format: 'markdown' },
+      });
+      if (res.code === 0) ElMessage.success('导出成功: ' + res.data.file_name);
+      else ElMessage.error(res.message || '导出失败');
+    }
+
+    async function sendMessage() {
+      if (!chatInput.value.trim() || loading.value) return;
+      const q = chatInput.value.trim();
+      chatInput.value = '';
+      messages.value.push({ role: 'user', content: q, sources: [], tokens: 0, latency: 0 });
+      loading.value = true;
+      await nextTick();
+      scrollToBottom();
+      try {
+        const res = await api('/api/chat', {
+          method: 'POST',
+          body: { question: q, session_id: currentSession.value, use_rag: chatOptions.value.useRag, top_k: parseInt(chatOptions.value.topK) },
+        });
+        if (res.code === 0) {
+          const data = res.data;
+          messages.value.push({ role: 'assistant', content: data.answer, sources: data.sources || [], tokens: data.tokens_used, latency: data.latency_ms, model: data.model });
+          // 更新会话信息
+          const si = sessions.value.find(s => s.session_id === currentSession.value);
+          if (si) { si.message_count = (si.message_count||0) + 1; si.token_usage = (si.token_usage||0) + (data.tokens_used||0); }
+        } else {
+          messages.value.push({ role: 'assistant', content: '❌ ' + (res.message||'请求失败'), sources: [], tokens: 0, latency: 0 });
+        }
+      } catch(e) {
+        messages.value.push({ role: 'assistant', content: '❌ 网络错误', sources: [], tokens: 0, latency: 0 });
+      }
+      loading.value = false;
+      await nextTick();
+      scrollToBottom();
+    }
+
+    function scrollToBottom() {
+      if (chatContainer.value) chatContainer.value.scrollTop = chatContainer.value.scrollHeight;
+    }
+
+    // ========== Documents ==========
+    async function loadDocs() {
+      const res = await api('/api/documents?keyword=' + encodeURIComponent(docFilter.value) + '&page=1&page_size=100');
+      if (res.code === 0) docList.value = res.data;
+    }
+
+    async function handleFileSelect(e) {
+      const files = e.target.files;
+      if (!files.length) return;
+      await uploadFiles(Array.from(files));
+      e.target.value = '';
+    }
+
+    async function handleDrop(e) {
+      const files = Array.from(e.dataTransfer.files);
+      if (!files.length) return;
+      await uploadFiles(files);
+    }
+
+    async function uploadFiles(files) {
+      let uploaded = 0;
+      for (const file of files) {
+        const formData = new FormData();
+        formData.append('file', file);
+        const res = await fetch('/api/documents/upload', { method: 'POST', body: formData });
+        const json = await res.json();
+        if (json.code === 0) uploaded++;
+      }
+      ElMessage.success(`成功上传 ${uploaded}/${files.length} 个文件`);
+      await loadDocs();
+    }
+
+    async function deleteDoc(id) {
+      await ElMessageBox.confirm('确定删除此文档？', '确认');
+      await api(`/api/documents/${id}`, { method: 'DELETE' });
+      ElMessage.success('文档已删除');
+      await loadDocs();
+    }
+
+    // ========== Workflows ==========
+    async function loadWorkflows() {
+      const res = await api('/api/workflows');
+      if (res.code === 0) workflows.value = res.data || [];
+    }
+
+    async function createWorkflow() {
+      const res = await api('/api/workflows', { method: 'POST', body: newWorkflow.value });
+      if (res.code === 0) { workflows.value.push(res.data); showNewWorkflow.value = false; newWorkflow.value = { name:'', type:'report', cron:'' }; ElMessage.success('工作流创建成功'); }
+      else ElMessage.error(res.message||'创建失败');
+    }
+
+    async function runWorkflow(id) {
+      const res = await api('/api/workflows/run', { method: 'POST', body: { workflow_id: id } });
+      if (res.code === 0) ElMessage.success('工作流已触发');
+      else ElMessage.error(res.message||'运行失败');
+    }
+
+    async function toggleWorkflow(wf) {
+      const res = await api(`/api/workflows/${wf.id}`, { method: 'PATCH', body: { enabled: !wf.enabled } });
+      if (res.code === 0) wf.enabled = !wf.enabled;
+    }
+
+    // ========== Analytics ==========
+    async function loadAlerts() {
+      const res = await api('/api/system/alerts?page=1&page_size=20');
+      if (res.code === 0) alerts.value = res.data.items || [];
+    }
+
+    async function resolveAlert(id) {
+      await api(`/api/system/alerts/${id}/resolve`, { method: 'PATCH' });
+      const a = alerts.value.find(a => a.id === id);
+      if (a) a.is_resolved = true;
+    }
+
+    async function loadAllLogs() {
+      const res = await api('/api/system/logs?page=1&page_size=100');
+      if (res.code === 0) allLogs.value = res.data.items || [];
+    }
+
+    async function loadTokenStats() {
+      const res = await api('/api/system/tokens/stats');
+      if (res.code === 0) tokenStats.value = res.data;
+    }
+
+    // ========== System Settings ==========
+    async function loadSettings() {
+      const res = await api('/api/system/settings');
+      if (res.code === 0) sysConfig.value = res.data;
+    }
+
+    async function setMode(mode) {
+      await api('/api/system/settings', { method: 'PATCH', body: { ai_mode: mode } });
+      sysConfig.value.ai_mode = mode;
+      ElMessage.success('AI 模式已切换');
+    }
+
+    async function saveSettings() {
+      await api('/api/system/settings', {
+        method: 'PATCH',
+        body: {
+          temperature: parseFloat(sysConfig.value.temperature),
+          top_k: parseInt(sysConfig.value.top_k),
+          chunk_size: parseInt(sysConfig.value.chunk_size),
+        },
+      });
+      ElMessage.success('配置已保存');
+    }
+
+    // ========== Utils ==========
+    function formatSize(bytes) {
+      if (!bytes) return '0 B';
+      const k = 1024;
+      const sizes = ['B','KB','MB','GB'];
+      const i = Math.floor(Math.log(bytes)/Math.log(k));
+      return parseFloat((bytes/Math.pow(k,i)).toFixed(1)) + ' ' + sizes[i];
+    }
+
+    function formatUptime(seconds) {
+      if (!seconds) return '0秒';
+      if (seconds < 60) return seconds.toFixed(0) + '秒';
+      if (seconds < 3600) return (seconds/60).toFixed(0) + '分钟';
+      if (seconds < 86400) return (seconds/3600).toFixed(1) + '小时';
+      return (seconds/86400).toFixed(1) + '天';
+    }
+
+    // ========== Auto Refresh ==========
+    onMounted(() => {
+      document.documentElement.setAttribute('data-theme', darkTheme.value ? 'dark' : 'light');
+      loadDashboard();
+      _dashTimer = setInterval(loadDashboard, 30000);
+    });
+
+    watch(() => page.value, async (p) => {
+      if (p === 'dashboard') {
+        await loadDashboard();
+        if (_dashTimer) clearInterval(_dashTimer);
+        _dashTimer = setInterval(loadDashboard, 30000);
+      } else {
+        if (_dashTimer) clearInterval(_dashTimer);
+      }
+    });
+
+    watch(docFilter, () => loadDocs());
+
+    return {
+      page, sidebarCollapsed, darkTheme, loading, messages, chatInput,
+      currentSession, sessions, chatOptions, currentSessionInfo,
+      chatContainer, chatInputEl, docFilter, docList, workflows,
+      showNewWorkflow, newWorkflow, health, dash, tokenStats,
+      tokenTrend, trendDays, alerts, recentLogs, allLogs, sysConfig,
+      pageTitle, healthColor, cpuColor, memColor, diskColor, unreadCount,
+      toggleTheme, switchPage, loadTokenTrend,
+      loadSessions, loadHistory, createSession, selectSession, deleteSession,
+      toggleFavorite, exportSession, sendMessage,
+      handleFileSelect, handleDrop, deleteDoc,
+      createWorkflow, runWorkflow, toggleWorkflow,
+      resolveAlert, setMode, saveSettings,
+      formatSize, formatUptime,
+    };
+  },
+});
+
+app.mount('#app');
+</script>
+</body>
+</html>

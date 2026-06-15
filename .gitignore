@@ -1,0 +1,59 @@
+# ============================================
+# 轻企AI智能办公系统 - Git 忽略配置
+# ============================================
+
+# 虚拟环境
+.venv/
+.env/
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+
+# 运行时存储（数据库、向量库、上传文件）
+backend/storage/
+backend/data/
+*.db
+*.sqlite
+
+# 日志文件
+*.log
+logs/
+backend/storage/logs/
+
+# 导出文件
+backend/storage/exports/
+
+# 编辑器和IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+.DS_Store
+Thumbs.db
+
+# 构建产物
+dist/
+build/
+*.egg-info/
+
+# 临时文件
+*.tmp
+*.bak
+*.backup
+
+# Jupyter notebooks
+.ipynb_checkpoints/
+
+# 环境变量（生产环境配置）
+backend/.env
+.env.local
+.env.production
+
+# 测试文件
+test*.py
+_test.py
+__test__.py
+.pytest_cache/
+.tox/
